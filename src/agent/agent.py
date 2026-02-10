@@ -51,7 +51,6 @@ class Agent:
         """Return unit vector of current direction."""
         return (math.cos(self.direction), math.sin(self.direction))
     
-    @property
     def reset(self):
         """Reset agent to initial state."""
         self.x = self.start_x
@@ -115,7 +114,7 @@ class Agent:
         #normalized sensor distances (closer = lower values)
         for dist in self.sensor_distances:
             normalized = dist / sensor_range # 0 to 1
-            input.append(normalized)
+            inputs.append(normalized)
 
         angle_to_goal = self._angle_to_point(goal_x, goal_y)
         
@@ -167,7 +166,7 @@ class Agent:
 
         self.steps_taken += 1
 
-    def update(self, maze, goal_x: float, goal_y: float, sensor_range: float):
+    def update(self, maze, goal_x: float, goal_y: float, sensor_range: float, raycaster):
         """
         Update agent state based on maze and goal
 
