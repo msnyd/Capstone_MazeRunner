@@ -1,6 +1,6 @@
 import pygame
-import src
 import config
+from src.maze import Maze
 
 def main():
     #Pygame Setup
