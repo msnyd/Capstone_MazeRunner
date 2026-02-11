@@ -5,7 +5,7 @@ from src.maze import Maze
 def main():
     #Pygame Setup
     pygame.init()
-    maze = Maze("maze_layout.json")
+    maze = Maze("src/maze_layout.json")
     screen = pygame.display.set_mode((1280,720)) #just made the display standard HD
     pygame.display.set_caption("2D Neuroevolution Maze Runner")
     clock = pygame.time.Clock()
