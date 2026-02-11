@@ -5,6 +5,7 @@ from src.maze import Maze
 def main():
     #Pygame Setup
     pygame.init()
+    maze = Maze("maze_layout.json")
     screen = pygame.display.set_mode((1280,720)) #just made the display standard HD
     pygame.display.set_caption("2D Neuroevolution Maze Runner")
     clock = pygame.time.Clock()
@@ -26,6 +27,8 @@ def main():
         #Fall back on black background    
         else:
             screen.fill((0,0,0)) 
+        maze.draw(screen)
+
     #The code below allows the user to exit the window by pressing the red x top right
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
