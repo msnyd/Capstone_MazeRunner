@@ -1,14 +1,21 @@
 import pygame
-import src
 import config
+from src.maze import Maze
+from src.agent.agent import Agent
 
 def main():
     #Pygame Setup
     pygame.init()
-    screen = pygame.display.set_mode((1280,720)) #just made the display standard HD
+    maze = Maze("src/maze_layout.json")
+    screen = pygame.display.set_mode((1280,720))                    #just made the display standard HD
     pygame.display.set_caption("2D Neuroevolution Maze Runner")
     clock = pygame.time.Clock()
     running = True
+
+    #Creating a temp agent test dummy *DELETE LATER*
+    start_x, start_y = maze.start
+    test_dummy = Agent(start_x, start_y, direction=0.0)
+    #Creating a temp agent test dummy *DELETE LATER*
 
     #Error checking for temp maze background file
     try:
@@ -19,13 +26,20 @@ def main():
         maze_background = None
 
     while running:
-        clock.tick(60) #Limit the FPS to 60, we can go lower if we need better performance.
-        #Draw background if its available
+        clock.tick(60)                                                #Limit the FPS to 60, we can go lower if we need better performance.
+        #Draw background if its available.
         if maze_background: 
             screen.blit(maze_background, (0,0))  
-        #Fall back on black background    
+        #Fall back on black background.    
         else:
             screen.fill((0,0,0)) 
+        maze.draw(screen)
+
+        #Creating a temp agent test dummy *DELETE LATER*
+        test_dummy.move(0,1)
+        test_dummy.draw(screen)
+        #Creating a temp agent test dummy *DELETE LATER*
+
     #The code below allows the user to exit the window by pressing the red x top right
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -44,7 +58,7 @@ def main():
         
     pygame.quit()
 
-
+#Temp edits being made, testing linking github to VSCode.
     
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ sensors that detect maze walls via raycasting
 
 import math
 import numpy as np
+import pygame
 
 class Agent:
     def __init__(self, x: float, y:float, direction: float, radius: float = 8.0):
@@ -220,3 +221,18 @@ class Agent:
                 f"dir={math.degrees(self.direction):.1f}°, "
                 f"alive={self.alive}, "
                 f"fitness={self.fitness:.2f})")
+    
+    def draw(self, screen):
+        """Draw the agent as a circle with a direction line."""
+        x = int(self.x)
+        y = int(self.y)
+
+        #Body of the agent
+
+        pygame.draw.circle(screen, (0,0,255), (x,y), self.radius)
+
+        #Direction line (shows where the agent is facing for visuals)
+        direction_x = math.cos(self.direction) * 20 #( * 20 makes it 20 pixels long)
+        direction_y = math.sin(self.direction) * 20 #( * 20 makes it 20 pixels long)
+
+        pygame.draw.line(screen, (255, 255, 255), (x,y), (x + direction_x, y + direction_y), 2)
