@@ -1,6 +1,7 @@
 import pygame
 import config
 from src.maze import Maze
+from src.agent.agent import Agent
 
 def main():
     #Pygame Setup
@@ -10,6 +11,11 @@ def main():
     pygame.display.set_caption("2D Neuroevolution Maze Runner")
     clock = pygame.time.Clock()
     running = True
+
+    #Creating a temp agent test dummy *DELETE LATER*
+    start_x, start_y = maze.start
+    test_dummy = Agent(start_x, start_y, direction=0.0)
+    #Creating a temp agent test dummy *DELETE LATER*
 
     #Error checking for temp maze background file
     try:
@@ -28,6 +34,11 @@ def main():
         else:
             screen.fill((0,0,0)) 
         maze.draw(screen)
+
+        #Creating a temp agent test dummy *DELETE LATER*
+        test_dummy.move(0,1)
+        test_dummy.draw(screen)
+        #Creating a temp agent test dummy *DELETE LATER*
 
     #The code below allows the user to exit the window by pressing the red x top right
         for event in pygame.event.get():
