@@ -1,12 +1,12 @@
 import json
 import pygame
-
+import src.maze
 
 class Maze:
     def __init__(self, json_file):
         self.walls = []
-        self.start = None
-        self.goal = None
+        self.start = (0, 0)
+        self.goal = (0, 0)
 
         self.load_from_json(json_file)
 
@@ -40,8 +40,18 @@ class Maze:
         pygame.draw.circle(screen, (0, 255, 0), self.start, 8)
         pygame.draw.circle(screen, (255, 0, 0), self.goal, 8)
 
-    def check_collision(self, rect):
+    def check_collision(self, x, y, radius):
+        #create a bounding box for the circle
+        agent_rect = pygame.Rect(
+            x - radius,
+            y - radius,
+            radius * 2,
+            radius * 2
+        )
         for wall in self.walls:
-            if rect.colliderect(wall):
+            if agent_rect.colliderect(wall):
                 return True
         return False
+    
+
+

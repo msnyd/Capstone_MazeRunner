@@ -6,7 +6,8 @@ from src.agent.agent import Agent
 def main():
     #Pygame Setup
     pygame.init()
-    maze = Maze("src/maze_layout.json")
+    maze = Maze("src/maze/test_maze.json")
+    # maze = Maze("src/maze_layout.json")
     screen = pygame.display.set_mode((1280,720))                    #just made the display standard HD
     pygame.display.set_caption("2D Neuroevolution Maze Runner")
     clock = pygame.time.Clock()
@@ -26,24 +27,42 @@ def main():
         maze_background = None
 
     while running:
-        clock.tick(60)                                                #Limit the FPS to 60, we can go lower if we need better performance.
-        #Draw background if its available.
+        clock.tick(60)
+        
+        # Background
         if maze_background: 
             screen.blit(maze_background, (0,0))  
-        #Fall back on black background.    
         else:
-            screen.fill((0,0,0)) 
+            screen.fill((255, 255, 255))  # White background to see walls
+        
         maze.draw(screen)
 
-        #Creating a temp agent test dummy *DELETE LATER*
-        test_dummy.move(0,1)
-        test_dummy.draw(screen)
-        #Creating a temp agent test dummy *DELETE LATER*
+        # Keyboard controls
+        keys = pygame.key.get_pressed()
+        turn = 0
+        if keys[pygame.K_a]:
+            turn = -0.1
+        if keys[pygame.K_d]:
+            turn = 0.1
 
-    #The code below allows the user to exit the window by pressing the red x top right
+        # Save position before moving
+        old_x, old_y = test_dummy.x, test_dummy.y
+        
+        # Move
+        test_dummy.move(turn, 1)
+        
+        # Collision check
+        if maze.check_collision(test_dummy.x, test_dummy.y, test_dummy.radius):
+            print(f"COLLISION at ({test_dummy.x:.1f}, {test_dummy.y:.1f})")
+            test_dummy.x, test_dummy.y = old_x, old_y  # Revert position
+
+        test_dummy.draw(screen)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+        pygame.display.flip()
 
         #-----------------------------------------------
         # I believe future simulation updates go here:
@@ -53,9 +72,7 @@ def main():
         # - maze rendering
         #------------------------------------------------
 
-        # The flip() function updates the entire screen with all new changes that have been drawn making them visible to the user
-        pygame.display.flip() 
-        
+        # The flip() function updates the entire screen with all new changes that have been drawn making them visible to the user        
     pygame.quit()
 
 #Temp edits being made, testing linking github to VSCode.
