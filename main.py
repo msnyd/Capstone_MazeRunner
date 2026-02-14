@@ -2,7 +2,7 @@ import pygame
 import config
 from src.maze import Maze
 from src.agent.agent import Agent
-from src.agent.raycaster import WideRaycaster
+from src.agent.raycaster import WideRaycaster, SimpleRaycaster
 
 def main():
     #Pygame Setup
@@ -14,7 +14,7 @@ def main():
     clock = pygame.time.Clock()
     running = True
     font = pygame.font.Font(None, 28)  # For displaying info
-    raycaster = WideRaycaster(max_range=200.0)
+    raycaster = SimpleRaycaster(max_range=400.0)
 
 
     #Creating a temp agent test dummy *DELETE LATER*
@@ -90,7 +90,8 @@ def main():
         test_dummy.draw(screen)
 
         # Display sensor info (top-left corner)
-        labels = ['Far L', 'Left', 'Fwd', 'Right', 'Far R']
+        # labels = ['Far L', 'Left', 'Fwd', 'Right', 'Far R']
+        labels = ['Left', 'Fwd', 'Right']
         for i, dist in enumerate(distances):
             color = (255, 0, 0) if dist < 30 else (255, 255, 255)  # Red if close to wall
             text = font.render(f"{labels[i]}: {dist:.0f}px", True, color)
