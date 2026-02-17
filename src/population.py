@@ -46,31 +46,31 @@ class Population:
         self.alive_count = sum(i.alive for i in self.agents)
         return any_alive
 
-def draw(self, screen):
-    """
-    Draws all agents onto the screen.
-    """
-    for agent in self.agents:
-        agent.draw(screen)
-
-def reset(self):
-    """
-    Reset all agents back to the starting position.
-    """
-    for agent in self.agents:
-        agent.reset()
-
-def calculate_fitness(self, goal_x, goal_y):
-    """
-    Assigns a fitness score based on the distance to the goal.
-    """
-    for agent in self.agents:
-        distance = agent.distance_to(goal_x, goal_y)
-        agent.fitness = 1.0 / (distance + 1.0)
-
-def is_generation_over(self):
-    """
-    Checks if all agents either died or reached the goal.
-    """
-    return all((not a.alive) or a.reached_goal for a in self.agents)
+    def draw(self, screen):
+        """
+        Draws all agents onto the screen.
+        """
+        for agent in self.agents:
+            agent.draw(screen)
+    
+    def reset(self):
+        """
+        Reset all agents back to the starting position.
+        """
+        for agent in self.agents:
+            agent.reset()
+    
+    def calculate_fitness(self, goal_x, goal_y):
+        """
+        Assigns a fitness score based on the distance to the goal.
+        """
+        for agent in self.agents:
+            distance = agent.distance_to(goal_x, goal_y)
+            agent.fitness = 1.0 / (distance + 1.0)
+    
+    def is_generation_over(self):
+        """
+        Checks if all agents either died or reached the goal.
+        """
+        return all((not a.alive) or a.reached_goal for a in self.agents)
 
