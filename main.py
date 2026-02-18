@@ -3,24 +3,24 @@ import config
 from src.maze import Maze
 from src.agent.agent import Agent
 from src.agent.raycaster import WideRaycaster, SimpleRaycaster
+from src.population import Population
 
 def main():
     #Pygame Setup
     pygame.init()
     maze = Maze("src/maze/test_maze.json")
-    # maze = Maze("src/maze_layout.json")
     screen = pygame.display.set_mode((1280,720))                    #just made the display standard HD
     pygame.display.set_caption("2D Neuroevolution Maze Runner")
     clock = pygame.time.Clock()
     running = True
+    generation_finished = False  # Track if message has been printed
     font = pygame.font.Font(None, 28)  # For displaying info
-    raycaster = SimpleRaycaster(max_range=400.0)
-
-
-    #Creating a temp agent test dummy *DELETE LATER*
+    # Setup for the Population
     start_x, start_y = maze.start
-    test_dummy = Agent(start_x, start_y, direction=0.0)
-    #Creating a temp agent test dummy *DELETE LATER*
+    population = Population(size=10, start_x= start_x, start_y=start_y, view_rays=True)
+    goal_x, goal_y = maze.goal
+
+
 
     #Error checking for temp maze background file
     try:
@@ -32,6 +32,8 @@ def main():
 
     while running:
         clock.tick(60)
+
+
         
         # Event handling (moved to top for responsiveness)
         for event in pygame.event.get():
@@ -46,64 +48,21 @@ def main():
         
         # Draw maze
         maze.draw(screen)
+        # Update and draw the Population
+        population.update(maze, goal_x, goal_y)
+        population.draw(screen, maze)
 
-        # Keyboard controls
-        keys = pygame.key.get_pressed()
-        turn = 0
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            turn = -0.1
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            turn = 0.1
+        # Check if the generation is complete.
+        if population.is_generation_over():
+            if not generation_finished:
+                population.calculate_fitness(goal_x, goal_y)
+                print("Generation: ", population.generation, " finished!")
+                generation_finished = True
+        else:
+            generation_finished = False
 
-        # Save position before moving
-        old_x, old_y = test_dummy.x, test_dummy.y
-        
-        # Move
-        test_dummy.move(turn, 1)
-                
-        # Collision check
-        if maze.check_collision(test_dummy.x, test_dummy.y, test_dummy.radius):
-            print(f"COLLISION at ({test_dummy.x:.1f}, {test_dummy.y:.1f})")
-            test_dummy.x, test_dummy.y = old_x, old_y
 
-        # Cast rays and get distances
-        distances = raycaster.cast_rays(
-            test_dummy.x, 
-            test_dummy.y, 
-            test_dummy.direction, 
-            maze.walls
-        )
-        
-        # Store in agent (for neural network later)
-        test_dummy.sensor_distances = distances
 
-        # Draw rays (yellow lines with red hit points)
-        raycaster.draw(
-            screen, 
-            test_dummy.x, 
-            test_dummy.y, 
-            test_dummy.direction, 
-            maze.walls
-        )
-
-        # Draw agent
-        test_dummy.draw(screen)
-
-        # Display sensor info (top-left corner)
-        # labels = ['Far L', 'Left', 'Fwd', 'Right', 'Far R']
-        labels = ['Left', 'Fwd', 'Right']
-        for i, dist in enumerate(distances):
-            color = (255, 0, 0) if dist < 30 else (255, 255, 255)  # Red if close to wall
-            text = font.render(f"{labels[i]}: {dist:.0f}px", True, color)
-            screen.blit(text, (10, 10 + i * 25))
-        
-        # Display agent info
-        pos_text = font.render(f"Position: ({test_dummy.x:.0f}, {test_dummy.y:.0f})", True, (255, 255, 255))
-        screen.blit(pos_text, (10, 650))
-        
-        # Display controls
-        controls_text = font.render("Controls: A/D or Arrow Keys to turn", True, (100, 100, 100))
-        screen.blit(controls_text, (10, 690))
 
         pygame.display.flip()
         
