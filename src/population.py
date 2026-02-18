@@ -1,8 +1,8 @@
 from src.agent.agent import Agent
 from src.agent.raycaster import WideRaycaster
-
+import math
 class Population:
-    def __init__(self, size, start_x, start_y):
+    def __init__(self, size, start_x, start_y, view_rays=False):
         """
         Creates a population of agents.
         All agents start at the same starting point of the maze.
@@ -14,8 +14,14 @@ class Population:
         self.size = size
         self.start_x = start_x
         self.start_y = start_y
+        self.view_rays = view_rays
 
-        self.agents = [ Agent(start_x, start_y, direction=0.0) for _ in range(size) ]
+        # Assign each agent a unique initial direction for visual separation
+        angle_step = 2 * math.pi / size if size > 1 else 0
+        self.agents = [
+            Agent(start_x, start_y, direction=(i * angle_step))
+            for i in range(size)
+        ]
 
         # Shared WideRaycaster for all agents
         self.raycaster = WideRaycaster(max_range=150)
@@ -46,20 +52,24 @@ class Population:
         self.alive_count = sum(i.alive for i in self.agents)
         return any_alive
 
-    def draw(self, screen):
+    def draw(self, screen, maze=None):
         """
-        Draws all agents onto the screen.
+        Draws all agents and their rays onto the screen.
+        If maze is provided, draws rays using the raycaster for each agent.
         """
         for agent in self.agents:
             agent.draw(screen)
-    
+            if maze is not None:
+                if self.view_rays:
+                    self.raycaster.draw(screen, agent.x, agent.y, agent.direction, maze.walls)
+
     def reset(self):
         """
         Reset all agents back to the starting position.
         """
         for agent in self.agents:
             agent.reset()
-    
+
     def calculate_fitness(self, goal_x, goal_y):
         """
         Assigns a fitness score based on the distance to the goal.
@@ -67,7 +77,7 @@ class Population:
         for agent in self.agents:
             distance = agent.distance_to(goal_x, goal_y)
             agent.fitness = 1.0 / (distance + 1.0)
-    
+
     def is_generation_over(self):
         """
         Checks if all agents either died or reached the goal.
