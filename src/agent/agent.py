@@ -204,7 +204,7 @@ class Agent:
         return math.sqrt((self.x - x) ** 2 + (self.y - y) ** 2)
     
     def copy(self) -> 'Agent':
-        """create a copyt of this agent (without brain)"""
+        """create a copy of this agent (without brain)"""
         new_agent = Agent(
             self.start_x, 
             self.start_y, 

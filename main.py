@@ -1,127 +1,232 @@
+"""
+Neuroevolution Maze Navigator
+
+Controls:
+    SPACE   - Pause/Resume
+    R       - Reset generation
+    N       - Force next generation
+    F       - Toggle fast mode
+    +/=     - Speed up
+    -       - Slow down
+    ESC     - Quit
+"""
+
 import pygame
-import config
+import math
 from src.maze import Maze
 from src.agent.agent import Agent
-from src.agent.raycaster import WideRaycaster, SimpleRaycaster
+from src.agent.raycaster import WideRaycaster
+from src.neural.neural_network import NeuralNetwork
+from src.population import Population
+
+# ============== CONFIGURATION ==============
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+FPS = 60
+
+# Population settings
+POPULATION_SIZE = 50
+MAX_STEPS = 500
+
+# Neural network: 6 inputs (5 sensors + goal angle), 8 hidden, 1 output (turn)b n
+NN_SHAPE = (6, 8, 1)
+
+# Genetic algorithm
+ELITE_COUNT = 5
+MUTATION_RATE = 0.15
+MUTATION_STRENGTH = 0.3
+# ===========================================
+
 
 def main():
-    #Pygame Setup
+    # Pygame setup
     pygame.init()
-    maze = Maze("src/maze/test_maze.json")
-    # maze = Maze("src/maze_layout.json")
-    screen = pygame.display.set_mode((1280,720))                    #just made the display standard HD
-    pygame.display.set_caption("2D Neuroevolution Maze Runner")
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Neuroevolution Maze Navigator")
     clock = pygame.time.Clock()
-    running = True
-    font = pygame.font.Font(None, 28)  # For displaying info
-    raycaster = SimpleRaycaster(max_range=400.0)
+    font = pygame.font.Font(None, 28)
+    font_large = pygame.font.Font(None, 36)
 
-
-    #Creating a temp agent test dummy *DELETE LATER*
+    # Load maze
+    maze = Maze("src/maze/test_maze.json")
+    
+    # Get start/goal positions
     start_x, start_y = maze.start
-    test_dummy = Agent(start_x, start_y, direction=0.0)
-    #Creating a temp agent test dummy *DELETE LATER*
+    goal_x, goal_y = maze.goal
+    
+    # Calculate max distance for fitness normalization
+    max_distance = math.sqrt(SCREEN_WIDTH**2 + SCREEN_HEIGHT**2)
 
-    #Error checking for temp maze background file
-    try:
-        maze_background = pygame.image.load('./temp_maze_background.jpg')
-        maze_background = pygame.transform.scale(maze_background, (1280, 720))
-    except:
-        print("Warning: Could not load temp_maze_background.jpg")
-        maze_background = None
+    # Create population
+    population = Population(POPULATION_SIZE, start_x, start_y, NN_SHAPE)
+
+    # Simulation state
+    running = True
+    paused = False
+    fast_mode = False
+    step_count = 0
+    sim_speed = 1
+
+    # Stats
+    best_ever_fitness = 0.0
+
+    # Print startup info
+    print("=" * 50)
+    print("NEUROEVOLUTION MAZE NAVIGATOR")
+    print("=" * 50)
+    print(f"Population: {POPULATION_SIZE}")
+    print(f"Network: {NN_SHAPE}")
+    print(f"Max steps: {MAX_STEPS}")
+    print("=" * 50)
 
     while running:
-        clock.tick(60)
-        
-        # Event handling (moved to top for responsiveness)
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        
+            
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                
+                elif event.key == pygame.K_SPACE:
+                    paused = not paused
+                    print("PAUSED" if paused else "RESUMED")
+                
+                elif event.key == pygame.K_r:
+                    population.reset()
+                    step_count = 0
+                    print("Generation reset")
+                
+                elif event.key == pygame.K_n:
+                    # Force evolution
+                    population.calculate_fitness(goal_x, goal_y, max_distance)
+                    population.evolve(ELITE_COUNT, MUTATION_RATE, MUTATION_STRENGTH)
+                    step_count = 0
+                    print(f"Forced evolution to gen {population.generation}")
+                
+                elif event.key == pygame.K_f:
+                    fast_mode = not fast_mode
+                    print(f"Fast mode: {'ON' if fast_mode else 'OFF'}")
+                
+                elif event.key in (pygame.K_PLUS, pygame.K_EQUALS):
+                    sim_speed = min(sim_speed + 1, 20)
+                    print(f"Speed: {sim_speed}x")
+                
+                elif event.key == pygame.K_MINUS:
+                    sim_speed = max(sim_speed - 1, 1)
+                    print(f"Speed: {sim_speed}x")
+
+        # Update simulation
+        if not paused:
+            for _ in range(sim_speed):
+                # Update all agents
+                any_active = population.update(maze, goal_x, goal_y)
+                step_count += 1
+
+                # Check if generation is over
+                if not any_active or step_count >= MAX_STEPS:
+                    # Calculate fitness
+                    population.calculate_fitness(goal_x, goal_y, max_distance)
+                    
+                    # Track best ever
+                    if population.best_fitness > best_ever_fitness:
+                        best_ever_fitness = population.best_fitness
+                    
+                    # Print stats
+                    stats = population.get_stats()
+                    print(f"Gen {stats['generation']:3d}: "
+                          f"Best={stats['best_fitness']:7.1f}, "
+                          f"Avg={stats['avg_fitness']:6.1f}, "
+                          f"Reached={stats['reached_goal']}")
+                    
+                    # Evolve
+                    population.evolve(ELITE_COUNT, MUTATION_RATE, MUTATION_STRENGTH)
+                    step_count = 0
+                    break
+
+        # ============== RENDERING ==============
         # Background
-        if maze_background: 
-            screen.blit(maze_background, (0, 0))  
-        else:
-            screen.fill((255, 255, 255))
-        
+        screen.fill((40, 40, 40))
+
         # Draw maze
         maze.draw(screen)
 
-        # Keyboard controls
-        keys = pygame.key.get_pressed()
-        turn = 0
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            turn = -0.1
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            turn = 0.1
+        # Draw agents (skip in fast mode)
+        if not fast_mode:
+            for agent in population.agents:
+                if agent.alive:
+                    x, y = int(agent.x), int(agent.y)
+                    
+                    # Color: blue (new) -> green (high fitness)
+                    if agent.fitness > 0:
+                        green = min(255, int(agent.fitness * 2))
+                        color = (100, green, 100)
+                    else:
+                        color = (100, 100, 255)
+                    
+                    pygame.draw.circle(screen, color, (x, y), agent.radius)
+                    
+                    # Direction line
+                    dx = math.cos(agent.direction) * 15
+                    dy = math.sin(agent.direction) * 15
+                    pygame.draw.line(screen, (255, 255, 255), 
+                                   (x, y), (x + dx, y + dy), 2)
 
-        # Save position before moving
-        old_x, old_y = test_dummy.x, test_dummy.y
+            # Draw rays for best agent
+            best = population.get_best()
+            if best and best.alive:
+                population.raycaster.draw(screen, best.x, best.y,
+                                         best.direction, maze.walls)
+
+        # ============== UI ==============
+        stats = population.get_stats()
+        y = 10
         
-        # Move
-        test_dummy.move(turn, 1)
-                
-        # Collision check
-        if maze.check_collision(test_dummy.x, test_dummy.y, test_dummy.radius):
-            print(f"COLLISION at ({test_dummy.x:.1f}, {test_dummy.y:.1f})")
-            test_dummy.x, test_dummy.y = old_x, old_y
-
-        # Cast rays and get distances
-        distances = raycaster.cast_rays(
-            test_dummy.x, 
-            test_dummy.y, 
-            test_dummy.direction, 
-            maze.walls
-        )
+        info_lines = [
+            f"Generation: {stats['generation']}",
+            f"Alive: {stats['alive']}/{POPULATION_SIZE}",
+            f"Reached Goal: {stats['reached_goal']}",
+            f"Step: {step_count}/{MAX_STEPS}",
+            "",
+            f"Best Fitness: {stats['best_fitness']:.1f}",
+            f"Avg Fitness: {stats['avg_fitness']:.1f}",
+            f"Best Ever: {best_ever_fitness:.1f}",
+            "",
+            f"Speed: {sim_speed}x",
+        ]
         
-        # Store in agent (for neural network later)
-        test_dummy.sensor_distances = distances
+        for line in info_lines:
+            if line:
+                text = font.render(line, True, (255, 255, 255))
+                screen.blit(text, (10, y))
+            y += 25
 
-        # Draw rays (yellow lines with red hit points)
-        raycaster.draw(
-            screen, 
-            test_dummy.x, 
-            test_dummy.y, 
-            test_dummy.direction, 
-            maze.walls
-        )
+        # Mode indicators
+        if fast_mode:
+            text = font_large.render("FAST MODE", True, (255, 255, 0))
+            screen.blit(text, (SCREEN_WIDTH // 2 - 70, 10))
 
-        # Draw agent
-        test_dummy.draw(screen)
+        if paused:
+            text = font_large.render("PAUSED", True, (255, 100, 100))
+            screen.blit(text, (SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2))
 
-        # Display sensor info (top-left corner)
-        # labels = ['Far L', 'Left', 'Fwd', 'Right', 'Far R']
-        labels = ['Left', 'Fwd', 'Right']
-        for i, dist in enumerate(distances):
-            color = (255, 0, 0) if dist < 30 else (255, 255, 255)  # Red if close to wall
-            text = font.render(f"{labels[i]}: {dist:.0f}px", True, color)
-            screen.blit(text, (10, 10 + i * 25))
-        
-        # Display agent info
-        pos_text = font.render(f"Position: ({test_dummy.x:.0f}, {test_dummy.y:.0f})", True, (255, 255, 255))
-        screen.blit(pos_text, (10, 650))
-        
-        # Display controls
-        controls_text = font.render("Controls: A/D or Arrow Keys to turn", True, (100, 100, 100))
-        screen.blit(controls_text, (10, 690))
+        # Controls
+        controls = "SPACE:Pause | R:Reset | N:Evolve | F:Fast | +/-:Speed | ESC:Quit"
+        text = font.render(controls, True, (150, 150, 150))
+        screen.blit(text, (10, SCREEN_HEIGHT - 30))
 
         pygame.display.flip()
-        
-    pygame.quit()
+        clock.tick(FPS)
 
-        #-----------------------------------------------
-        # I believe future simulation updates go here:
-        # - agent drawing
-        # - neural netowrk control
-        # - genetic algorithm steps
-        # - maze rendering
-        #------------------------------------------------
-
-        # The flip() function updates the entire screen with all new changes that have been drawn making them visible to the user        
-    pygame.quit()
-
-#Temp edits being made, testing linking github to VSCode.
+    # Cleanup
+    print("\n" + "=" * 50)
+    print(f"Final generation: {population.generation}")
+    print(f"Best ever fitness: {best_ever_fitness:.1f}")
+    print("=" * 50)
     
+    pygame.quit()
+
 
 if __name__ == "__main__":
     main()
