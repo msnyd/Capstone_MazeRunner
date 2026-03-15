@@ -1,0 +1,25 @@
+{
+    "Display": {
+        "refresh_rate": 60,
+        "width": 1280,
+        "height": 720
+    },
+
+    "Population": {
+        "size": 50,
+        "max_steps": 500
+    },
+    
+    "Neural_Network": {
+        "input_size": 6,
+        "hidden_size": 8,
+        "output_size": 1
+    },
+
+    "Genetic_Algorithm": {
+        "elite_count": 5,
+        "mutation_rate": 0.15,
+        "mutation_strength": 0.3
+    }
+
+}

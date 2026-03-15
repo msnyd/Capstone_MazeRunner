@@ -13,6 +13,7 @@ Controls:
 
 import pygame
 import math
+from config import Config 
 from src.maze import Maze
 from src.agent.agent import Agent
 from src.agent.raycaster import WideRaycaster
@@ -20,21 +21,23 @@ from src.neural.neural_network import NeuralNetwork
 from src.population import Population
 
 # ============== CONFIGURATION ==============
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
-FPS = 60
+config = Config()
+
+SCREEN_WIDTH = config.screen_width
+SCREEN_HEIGHT = config.screen_height
+FPS = config.refresh_rate
 
 # Population settings
-POPULATION_SIZE = 50
-MAX_STEPS = 500
+POPULATION_SIZE = config.population_size
+MAX_STEPS = config.max_steps
 
 # Neural network: 6 inputs (5 sensors + goal angle), 8 hidden, 1 output (turn)b n
-NN_SHAPE = (6, 8, 1)
+NN_SHAPE = (config.nn_input_size, config.nn_hidden_size, config.nn_output_size)
 
 # Genetic algorithm
-ELITE_COUNT = 5
-MUTATION_RATE = 0.15
-MUTATION_STRENGTH = 0.3
+ELITE_COUNT = config.elite_count
+MUTATION_RATE = config.mutation_rate
+MUTATION_STRENGTH = config.mutation_strength
 # ===========================================
 
 
