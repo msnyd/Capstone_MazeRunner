@@ -43,6 +43,24 @@ MUTATION_STRENGTH = config.mutation_strength
 
 def main():
     # Pygame setup
+    
+    print("Choose difficulty:")
+    print("1 = Easy")
+    print("2 = Medium")
+    print("3 = Hard")
+
+    choice = input("Enter choice: ")
+
+    if choice == "1":
+        difficulty = "easy"
+    elif choice == "2":
+        difficulty = "medium"
+    elif choice == "3":
+        difficulty = "hard"
+    else:
+        print("Invalid choice, defaulting to easy")
+        difficulty = "easy"
+    
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Neuroevolution Maze Navigator")
@@ -51,7 +69,8 @@ def main():
     font_large = pygame.font.Font(None, 36)
 
     # Load maze
-    maze = Maze("src/maze/test_maze.json")
+    maze_file = f"src/maze_{difficulty}.json"
+    maze = Maze(maze_file)
     
     # Get start/goal positions
     start_x, start_y = maze.start
