@@ -57,6 +57,8 @@ def main():
         difficulty = "medium"
     elif choice == "3":
         difficulty = "hard"
+    elif choice == "4":
+        difficulty = "very_hard"
     else:
         print("Invalid choice, defaulting to easy")
         difficulty = "easy"
