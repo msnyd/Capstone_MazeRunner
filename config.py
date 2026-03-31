@@ -2,9 +2,14 @@ import json
 
 class Config:
     def __init__(self, file_path="config.json"):
+        self.file_path = file_path
         with open(file_path, "r") as file:
-            data = json.load(file)
+            self.data = json.load(file)
+        
+        self._load_attributes()
 
+    def _load_attributes(self):
+        data = self.data
         # Display settings
         self.refresh_rate = data["Display"]["refresh_rate"]
         self.screen_width = data["Display"]["width"]
@@ -23,3 +28,19 @@ class Config:
         self.elite_count = data["Genetic_Algorithm"]["elite_count"]
         self.mutation_rate = data["Genetic_Algorithm"]["mutation_rate"]
         self.mutation_strength = data["Genetic_Algorithm"]["mutation_strength"]
+
+        self.difficulty = data["difficulty"]
+
+    def save(self):
+        # Push the updated values back into JSON structure
+        self.data["Population"]["size"] = self.population_size
+        self.data["Population"]["max_steps"] = self.max_steps
+
+        self.data["Genetic_Algorithm"]["elite_count"] = self.elite_count
+        self.data["Genetic_Algorithm"]["mutation_rate"] = self.mutation_rate
+        self.data["Genetic_Algorithm"]["mutation_strength"] = self.mutation_strength
+        
+        self.data["difficulty"] = self.difficulty
+
+        with open(self.file_path, "w") as file:
+            json.dump(self.data, file, indent=4)
