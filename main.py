@@ -13,14 +13,21 @@ Controls:
 
 import pygame
 import math
+import numpy as np
+
 from config import Config 
+from src.agent import agent
 from src.maze import Maze
 from src.agent.agent import Agent
 from src.agent.raycaster import WideRaycaster
+from src.agent.raycaster import CornerRaycaster
 from src.neural.neural_network import NeuralNetwork
 from src.population import Population
 from menu_screen import run_menu
 from setting_screen import run_settings
+from src.neural.network_visualizer import CompactNetworkVisualizer
+from network_popup import NetworkPopup
+
 
 # ============== CONFIGURATION ==============
 config = Config()
@@ -50,6 +57,8 @@ class Simulation:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 28)
         self.font_large = pygame.font.Font(None, 36)
+        self.font_small = pygame.font.Font(None, 22)
+        self.selected_agent = None
 
         # Load maze
         maze_file = f"src/maze_{config.difficulty}.json"
@@ -74,6 +83,10 @@ class Simulation:
         # Stats
         self.best_ever_fitness = 0.0
 
+        self.net_popup = NetworkPopup(SCREEN_WIDTH, SCREEN_HEIGHT)
+        selected_agent = None
+
+
         # Print startup info
         print("=" * 50)
         print("NEUROEVOLUTION MAZE NAVIGATOR")
@@ -90,10 +103,21 @@ class Simulation:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+
+                # Handle popup close events
+                if self.net_popup.visible:
+                    if event.type == pygame.KEYDOWN:
+                        if event.key in (pygame.K_ESCAPE, pygame.K_b):
+                            self.net_popup.hide()
+                            self.selected_agent = None
+                            self.paused = False
+                            continue
+                    # Mouse events fall through to agent selection below
                 
-                elif event.type == pygame.KEYDOWN:
+                # Keyboard events (when popup is NOT visible)
+                if event.type == pygame.KEYDOWN and not self.net_popup.visible:
                     if event.key == pygame.K_ESCAPE:
-                        return  # Return to menu instead of quit
+                        return  # Return to menu
                     
                     elif event.key == pygame.K_SPACE:
                         self.paused = not self.paused
@@ -102,13 +126,14 @@ class Simulation:
                     elif event.key == pygame.K_r:
                         self.population.reset()
                         self.step_count = 0
+                        self.selected_agent = None
                         print("Generation reset")
                     
                     elif event.key == pygame.K_n:
-                        # Force evolution
                         self.population.calculate_fitness(self.goal_x, self.goal_y, self.max_distance)
                         self.population.evolve(ELITE_COUNT, MUTATION_RATE, MUTATION_STRENGTH)
                         self.step_count = 0
+                        self.selected_agent = None
                         print(f"Forced evolution to gen {self.population.generation}")
                     
                     elif event.key == pygame.K_f:
@@ -123,17 +148,45 @@ class Simulation:
                         self.sim_speed = max(self.sim_speed - 1, 1)
                         print(f"Speed: {self.sim_speed}x")
 
+                # Mouse click - works whether popup is open or not
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left click
+                        mouse_x, mouse_y = event.pos
+                        
+                        # Check if clicked on any agent
+                        clicked_agent = None
+                        for agent in self.population.agents:
+                            if agent.alive:
+                                dist = math.sqrt((mouse_x - agent.x)**2 + (mouse_y - agent.y)**2)
+                                if dist <= agent.radius + 5:
+                                    clicked_agent = agent
+                                    break
+                        
+                        if clicked_agent:
+                            self.selected_agent = clicked_agent
+                            self.net_popup.show(clicked_agent)
+                            # self.paused = True
+                            print(f"Viewing agent - Fitness: {clicked_agent.fitness:.1f}")
+                        elif self.net_popup.visible:
+                            # Clicked empty space - close popup
+                            self.net_popup.hide()
+                            self.selected_agent = None
+                            self.paused = False
+
             # Update simulation
             if not self.paused:
                 for _ in range(self.sim_speed):
                     # Update all agents
-                    any_active = self.population.update(self.maze, self.goal_x, self.goal_y)
+                    any_active, is_stagnant = self.population.update(self.maze, self.goal_x, self.goal_y)
                     self.step_count += 1
 
                     # Check if generation is over
-                    if not any_active or self.step_count >= self.config.max_steps:
+                    if not any_active or self.step_count >= self.config.max_steps or is_stagnant:
                         # Calculate fitness
+                        if is_stagnant:
+                            print(f" -> stagnation detected, ending early at step {self.step_count}")
                         self.population.calculate_fitness(self.goal_x, self.goal_y, self.max_distance)
+                        
                         
                         # Track best ever
                         if self.population.best_fitness > self.best_ever_fitness:
@@ -163,14 +216,17 @@ class Simulation:
                 for agent in self.population.agents:
                     if agent.alive:
                         x, y = int(agent.x), int(agent.y)
-                        
-                        # Color: blue (new) -> green (high fitness)
-                        if agent.fitness > 0:
+
+                        if agent == self.selected_agent:
+                            pygame.draw.circle(self.screen, (255, 255, 0), (x, y), agent.radius + 5, 3)
+                            color = (255, 255, 100)
+                        elif agent.fitness > 0:
                             green = min(255, int(agent.fitness * 2))
                             color = (100, green, 100)
                         else:
                             color = (100, 100, 255)
-                        
+
+
                         pygame.draw.circle(self.screen, color, (x, y), agent.radius)
                         
                         # Direction line
@@ -184,6 +240,8 @@ class Simulation:
                 if best and best.alive:
                     self.population.raycaster.draw(self.screen, best.x, best.y,
                                              best.direction, self.maze.walls)
+                    
+
 
             # ============== UI ==============
             stats = self.population.get_stats()
@@ -221,6 +279,9 @@ class Simulation:
             controls = "SPACE:Pause | R:Reset | N:Evolve | F:Fast | +/-:Speed | ESC:Menu"
             text = self.font.render(controls, True, (150, 150, 150))
             self.screen.blit(text, (10, SCREEN_HEIGHT - 30))
+
+            if self.net_popup.visible:
+                self.net_popup.draw(self.screen, self.goal_x, self.goal_y)
 
             pygame.display.flip()
             self.clock.tick(FPS)

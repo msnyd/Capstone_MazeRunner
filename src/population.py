@@ -1,8 +1,9 @@
 from src.agent.agent import Agent
-from src.agent.raycaster import WideRaycaster
+from src.agent.raycaster import CornerRaycaster
 from src.neural.neural_network import NeuralNetwork
 from typing import List, Tuple
 import math
+import _random
 
 
 class Population:
@@ -29,7 +30,7 @@ class Population:
 
 
         # Shared WideRaycaster for all agents
-        self.raycaster = WideRaycaster(max_range=150)
+        self.raycaster = CornerRaycaster(max_range=150)
 
         # Will keep track of which generation the population is on.
         self.generation = 1
@@ -40,7 +41,12 @@ class Population:
         self.best_fitness = 0.0
         self.avg_fitness = 0.0
 
-    def update(self, maze, goal_x, goal_y, sensor_range=150):
+        # stagnation detection
+        self.best_ditance_seen = float('inf')
+        self.steps_without_progress = 0
+        self.stagnation_limit = 100
+
+    def update(self, maze, goal_x, goal_y, sensor_range=150) -> Tuple[bool, bool]:
         """
         Update all the agents within the population.
         Returns True if there is ANY agent that is still alive.
@@ -58,7 +64,10 @@ class Population:
                 any_alive = True
             
         self.alive_count = sum(i.alive for i in self.agents)
-        return any_alive
+
+        is_stagnant = self.steps_without_progress >= self.stagnation_limit
+
+        return any_alive, is_stagnant
 
     def draw(self, screen, draw_best_only=False):
         """
@@ -100,19 +109,27 @@ class Population:
         Assigns a fitness score based on the distance to the goal.
         """
         for agent in self.agents:
-            dist = agent.distance_to(goal_x, goal_y)
-            normalized_dist = dist / max_distance
-            fitness = (1 - normalized_dist) ** 2 * 100
+            start_dist = math.sqrt((self.start_x - goal_x)**2 + 
+                                   (self.start_y - goal_y)**2)
 
-            if agent.reached_goal: #fat bonus for reaching goal
+            final_dist = agent.distance_to(goal_x, goal_y)
+
+            progress = start_dist - final_dist
+            fitness = progress * 0.5
+
+            if final_dist < 100:
+                fitness += (100 - final_dist) * 0.5
+
+            if agent.reached_goal:
                 fitness += 1000
-                fitness += max(0, 500 - agent.steps_taken)  # faster = better
+                fitness += max(0, 500 - agent.steps_taken)
 
-            agent.fitness = fitness
+            agent.fitness = max(0, fitness)
 
         fitnesses = [a.fitness for a in self.agents]
         self.best_fitness = max(fitnesses)
         self.avg_fitness = sum(fitnesses) / len(fitnesses)
+
 
     def get_best(self) -> Agent:
         """Returns the agent with the highest fitness"""

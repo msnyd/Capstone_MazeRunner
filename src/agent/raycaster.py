@@ -199,3 +199,19 @@ class WideRaycaster(Raycaster):
     
     def __init__(self, max_range: float = 150.0):
         super().__init__(num_rays=5, fov=math.pi, max_range=max_range)
+
+class CornerRaycaster(Raycaster):
+    """7-ray raycaster for better corner detection."""
+    
+    def __init__(self, max_range: float = 200.0):
+        super().__init__(num_rays=7, fov=math.pi, max_range=max_range)
+        # Angles: -90°, -60°, -30°, 0°, 30°, 60°, 90°
+        self.ray_angles = [
+            -math.pi/2,      # Far left (90° left)
+            -math.pi/3,      # Left (60° left)
+            -math.pi/6,      # Slight left (30° left)
+            0.0,             # Forward
+            math.pi/6,       # Slight right (30° right)
+            math.pi/3,       # Right (60° right)
+            math.pi/2,       # Far right (90° right)
+        ]

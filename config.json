@@ -5,18 +5,18 @@
         "height": 720
     },
     "Population": {
-        "size": 20,
+        "size": 50,
         "max_steps": 1000
     },
     "Neural_Network": {
-        "input_size": 6,
-        "hidden_size": 8,
+        "input_size": 8,
+        "hidden_size": 10,
         "output_size": 1
     },
     "Genetic_Algorithm": {
         "elite_count": 5,
-        "mutation_rate": 0.13999999999999999,
+        "mutation_rate": 0.20000000000000004,
         "mutation_strength": 0.24999999999999994
     },
-    "difficulty": "medium"
+    "difficulty": "very_hard"
 }
