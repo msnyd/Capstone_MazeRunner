@@ -1,9 +1,18 @@
 import json
+import sys
+import os
+
+
+def resource_path(relative_path):
+    """Get path to resource, works for dev and PyInstaller"""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
 class Config:
     def __init__(self, file_path="config.json"):
         self.file_path = file_path
-        with open(file_path, "r") as file:
+        with open(resource_path(file_path), "r") as file:
             self.data = json.load(file)
         
         self._load_attributes()
@@ -32,6 +41,9 @@ class Config:
         self.difficulty = data["difficulty"]
 
     def save(self):
+        if hasattr(sys, '_MEIPASS'):
+            print("Settings cannot be saved in bundled mode")
+            return
         # Push the updated values back into JSON structure
         self.data["Population"]["size"] = self.population_size
         self.data["Population"]["max_steps"] = self.max_steps

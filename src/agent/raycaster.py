@@ -205,7 +205,6 @@ class CornerRaycaster(Raycaster):
     
     def __init__(self, max_range: float = 200.0):
         super().__init__(num_rays=7, fov=math.pi, max_range=max_range)
-        # Angles: -90°, -60°, -30°, 0°, 30°, 60°, 90°
         self.ray_angles = [
             -math.pi/2,      # Far left (90° left)
             -math.pi/3,      # Left (60° left)

@@ -17,7 +17,7 @@ import numpy as np
 
 from config import Config 
 from src.agent import agent
-from src.maze import Maze
+from maze import Maze
 from src.agent.agent import Agent
 from src.agent.raycaster import WideRaycaster
 from src.agent.raycaster import CornerRaycaster
