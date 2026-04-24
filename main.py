@@ -25,7 +25,6 @@ from src.neural.neural_network import NeuralNetwork
 from src.population import Population
 from menu_screen import run_menu
 from setting_screen import run_settings
-from src.neural.network_visualizer import CompactNetworkVisualizer
 from network_popup import NetworkPopup
 
 
