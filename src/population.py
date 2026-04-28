@@ -7,15 +7,33 @@ import _random
 
 
 class Population:
+    """
+Population and Genetic Algorithm module for MazeRunner.
+ 
+    Implements:
+        REQ-5.1: Population of agents with random neural networks
+        REQ-5.2: Update all living agents
+        REQ-5.3: Stagnation detection
+        REQ-5.4: Fitness calculation (progress-based)
+        REQ-5.4.1: Distance-based fitness
+        REQ-5.4.2: Goal bonus (1000+speed bonus)
+        REQ-5.5: Track best/average fitness
+        REQ-5.6: Tournament selection
+        REQ-5.7: Elitism (https://algorithmafternoon.com/genetic/elitist_genetic_algorithm/)
+        REQ-5.8: Crossover and mutation
+        REQ-5.9: Generation counter
+    """
     def __init__(self, size: int, start_x: float, start_y: float, 
                  nn_shape: Tuple[int, ...] = (6, 8, 1)):
         """
         Creates a population of agents.
-        All agents start at the same starting point of the maze.
+        all agents start at the same starting point of the maze.
         
         :param size: The total amount of agents in the population.
         :param start_x: starting x coordinate
         :param start_y: starting y coordinate
+
+        Implements: REQ-5.1
         """
         self.size = size
         self.start_x = start_x
@@ -55,6 +73,8 @@ class Population:
         :param goal_x: X coordinate of goal
         :param goal_y: Y coordinate of goal
         :param sensor_range: Max sensor distance for raycaster
+
+        Implements: REQ-5.2, REQ-5.3
         """
         any_alive = False
 
@@ -107,6 +127,8 @@ class Population:
     def calculate_fitness(self, goal_x: float, goal_y: float, max_distance: float):
         """
         Assigns a fitness score based on the distance to the goal.
+
+        Implements: REQ-5.4, REQ-5.4.1, REQ-5.4.2, REQ-5.5
         """
         for agent in self.agents:
             start_dist = math.sqrt((self.start_x - goal_x)**2 + 
@@ -166,6 +188,8 @@ class Population:
             elite_count: Number of top agents to keep unchanged
             mutation_rate: probability of mutating each gene
             mutation_strength: stdev of mutation noise
+
+        Implements: REQ-5.7, REQ-5.8, REQ-5.9
         """
         sorted_agents = self.get_sorted()
 
@@ -197,7 +221,11 @@ class Population:
         self.alive_count = self.size
 
     def _tournament_select(self, sorted_agents: List[Agent], tournament_size: int = 3) -> Agent:
-        """Select one agent using tournament selection"""
+        """
+        Select one agent using tournament selection
+        
+        Implements: REQ-5.6
+        """
         import random
         contestants = random.sample(sorted_agents, min(tournament_size, len(sorted_agents)))
         return max(contestants, key=lambda a: a.fitness)

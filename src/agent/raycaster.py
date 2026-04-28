@@ -10,6 +10,17 @@ import pygame
 from typing import List, Tuple, Optional
 
 class Raycaster:
+    """
+    Raycasting sensor system for MazeRunner.
+    
+    implements:
+        REQ-3.1: Configurable ray count and fov
+        REQ-3.2: Distance to nearest wall
+        REQ-3.3: Line segment intersection
+        REQ-3.4: CornerRaycaster with 7 fixed angle rays
+        REQ-3.5: draw() method for visualization
+        REQ-3.6: Ray rendering for best agent only
+    """
     def __init__(self, num_rays: int = 5, fov: float = math.pi, max_range: float = 150.0):
         """
         initialize raycaster
@@ -18,6 +29,8 @@ class Raycaster:
             num_rays: number of sensor rays
             fov: field of view in radians
             max_range: max ray distance
+
+        Implements: REQ-3.1
         """
 
         self.num_rays = num_rays
@@ -54,6 +67,8 @@ class Raycaster:
 
         Returns:
             List of distances (one per ray)
+        
+        Implements: REQ-3.2, REQ-3.3
         """
         distances = []
 
@@ -149,17 +164,17 @@ class Raycaster:
         dx2 = x4 - x3
         dy2 = y4 - y3
 
-        denom = dx1 * dy2 - dy1 * dx2
+        denom = dx1* dy2 - dy1 * dx2
 
         if abs(denom) < 1e-10:
             return None
         
-        t = ((x3 - x1) * dy2 - (y3 - y1) * dx2) / denom
+        t = ((x3 - x1) * dy2 - (y3 -y1) * dx2) / denom
         u = ((x3 - x1) * dy1 - (y3 - y1) * dx1) / denom
 
         if 0 <= t <= 1 and 0 <= u <= 1:
             ix = x1 + t * dx1
-            iy = y1 + t * dy1
+            iy = y1 + t *dy1
             return (ix, iy)
         
         return None
@@ -175,6 +190,8 @@ class Raycaster:
             direction: agent facing direction
             walls: list of walls
             color: ray color(yellow)
+
+        Implements: REQ-3.5
         """
 
         results = self.cast_rays_with_endpoints(x, y, direction, walls)
@@ -201,15 +218,19 @@ class WideRaycaster(Raycaster):
         super().__init__(num_rays=5, fov=math.pi, max_range=max_range)
 
 class CornerRaycaster(Raycaster):
-    """7-ray raycaster for better corner detection."""
+    """
+    7-ray raycaster for better corner detection.
+    
+    Implements: REQ-3.4
+    """
     
     def __init__(self, max_range: float = 200.0):
         super().__init__(num_rays=7, fov=math.pi, max_range=max_range)
         self.ray_angles = [
-            -math.pi/2,      # Far left (90° left)
+            -math.pi/2,      # far left (90° left)
             -math.pi/3,      # Left (60° left)
             -math.pi/6,      # Slight left (30° left)
-            0.0,             # Forward
+            0.0,             # forward
             math.pi/6,       # Slight right (30° right)
             math.pi/3,       # Right (60° right)
             math.pi/2,       # Far right (90° right)

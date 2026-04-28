@@ -2,6 +2,14 @@ import json
 import sys
 import os
 
+"""
+Configuration module for MazeRunner.
+ 
+Implements:
+    REQ-10.1: Central config object
+    REQ-10.2: Default config values
+"""
+
 
 def resource_path(relative_path):
     """Get path to resource, works for dev and PyInstaller"""

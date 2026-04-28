@@ -13,6 +13,19 @@ import src
 
 
 class NetworkPopup:
+    """
+    Neural Network Popup Visualizer class for MazeRunner.
+    
+    Implements:
+        REQ-8.1: Open popup on agent click
+        REQ-8.2: Display agent stats
+        REQ-8.3: Render network layers as columns
+        REQ-8.4: Node activation colors (yellow/blue)
+        REQ-8.5: Connection weight colors (green/red)
+        REQ-8.6: Input/output labels
+        REQ-8.7: Close with ESC/B/click
+        REQ-8.8: Semi-transparent overlay
+    """
     def __init__(self, screen_width: int, screen_height: int):
         """
         Initialize the popup visualizer.
@@ -24,7 +37,7 @@ class NetworkPopup:
         self.width = 500
         self.height = 400
         
-        # Center on screen
+        # center on screen
         self.x = (screen_width - self.width) // 2
         self.y = (screen_height - self.height) // 2
         
@@ -45,26 +58,35 @@ class NetworkPopup:
         self.font = None
         self.font_title = None
         
-        # Close button
+        # close button
         self.close_btn_rect = pygame.Rect(self.x + self.width - 35, self.y + 8, 25, 25)
         
-        # Labels for inputs/outputs
-        self.input_labels_5 = ['Far L', 'Left', 'Fwd', 'Right', 'Far R', 'Goal∠']
-        self.input_labels_7 = ['90°L', '60°L', '30°L', 'Fwd', '30°R', '60°R', '90°R', 'Goal∠']
+        # Labels for i/o
+        self.input_labels_5 = ['Far L', 'Left', 'Fwd', 'Right', 'Far R', 'Goal']
+        self.input_labels_7 = ['90°L', '60°L', '30°L', 'Fwd', '30°R', '60°R', '90°R', 'Goal']
         self.output_labels = ['Turn']
     
     def show(self, agent):
-        """Show the popup for a specific agent."""
+        """
+        Show the popup for a specific agent
+        
+        Implements: REQ-8.1
+        """
         self.visible = True
         self.agent = agent
     
     def hide(self):
-        """Hide the popup."""
+        """Hide the popup
+         Implements: REQ-8.7
+         """
         self.visible = False
         self.agent = None
     
     def toggle(self, agent=None):
-        """Toggle popup visibility."""
+        """Toggle popup visibility
+        
+        Implements: REQ-8.2 through REQ-8.6, REQ-8.8
+        """
         if self.visible:
             self.hide()
         elif agent:
@@ -72,10 +94,9 @@ class NetworkPopup:
     
     def handle_event(self, event) -> bool:
         """
-        Handle mouse/keyboard events.
-        
-        Returns True if event was consumed (popup should stay open).
-        Returns False if popup should close.
+        Handle mouse/keyboard events        
+        Returns True if event was consumed (popup should stay open)
+        Returns False if popup should close
         """
         if not self.visible:
             return False
@@ -89,7 +110,7 @@ class NetworkPopup:
             if event.button == 1:
                 mouse_x, mouse_y = event.pos
                 
-                # Check close button
+                #check close button
                 if self.close_btn_rect.collidepoint(mouse_x, mouse_y):
                     self.hide()
                     return True
@@ -103,7 +124,7 @@ class NetworkPopup:
         return True  # Consume event while popup is open
     
     def draw(self, screen, goal_x: float = 0, goal_y: float = 0):
-        """Draw the popup if visible."""
+        """Draw the popup if visible"""
         if not self.visible or not self.agent or not self.agent.brain:
             return
         
@@ -174,7 +195,7 @@ class NetworkPopup:
         self._draw_legend(screen)
     
     def _get_inputs(self, goal_x: float, goal_y: float) -> Optional[np.ndarray]:
-        """Get current input values from the agent."""
+        """Get current input values from the agent"""
         if not hasattr(self.agent, 'sensor_distances') or not self.agent.sensor_distances:
             return None
         
@@ -276,7 +297,7 @@ class NetworkPopup:
                 else:
                     activation = 0.0
                 
-                # Color based on activation (-1 to 1)
+                # Color based on activtion (-1 to 1)
                 if activation > 0:
                     r = 255
                     g = 255

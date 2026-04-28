@@ -9,6 +9,31 @@ Controls:
     +/=     - Speed up
     -       - Slow down
     ESC     - Quit
+
+
+
+Main simulation module for MazeRunner.
+ 
+Implements:
+    REQ-6.1: Configurable FPS
+    REQ-6.2: Speed multiplier (1x-20x)
+    REQ-6.3: SPACE pause/resume
+    REQ-6.4: R key reset
+    REQ-6.5: N key force evolution
+    REQ-6.6: F key fast mode
+    REQ-6.7: +/- speed adjustment
+    REQ-6.8: ESC return to menu
+    REQ-6.9: Auto-evolution triggers
+    REQ-6.10: Best-ever fitness tracking
+    
+    REQ-7.1: Agent rendering (circles)
+    REQ-7.2: Fitness-based coloring
+    REQ-7.3: Selected agent highlight
+    REQ-7.4: HUD display
+    REQ-7.5: PAUSED text
+    REQ-7.6: FAST MODE text
+    REQ-7.7: Controls reference
+
 """
 
 import pygame
@@ -51,6 +76,11 @@ MUTATION_STRENGTH = config.mutation_strength
 
 class Simulation:
     def __init__(self, screen, config):
+        """
+        Initialize simulation with screen, config, maze, and population.
+        
+        Implements: REQ-6.1, REQ-6.10
+        """
         self.screen = screen
         self.config = config
         self.clock = pygame.time.Clock()
@@ -96,6 +126,11 @@ class Simulation:
         print("=" * 50)
 
     def run_simulation(self):
+        """
+        Main simulation loop: handle events, update agents, render.
+        
+        Implements: REQ-6.2 through REQ-6.9, REQ-7.1 through REQ-7.7
+        """
         running = True
         while running:
             # Event handling

@@ -11,6 +11,20 @@ import numpy as np
 from typing import List, Tuple
 
 class NeuralNetwork:
+    """
+    Neural Network class for MazeRunner.
+    
+    Implements:
+        REQ-1.1: Feed-forward neural network with configurable topology
+        REQ-1.2: Xavier weight initialization (https://www.geeksforgeeks.org/deep-learning/xavier-initialization/)
+        REQ-1.3: Tanh activation function (https://www.geeksforgeeks.org/deep-learning/tanh-activation-in-neural-network/)
+        REQ-1.4: Forward pass method
+        REQ-1.5: get_genome() method
+        REQ-1.6: set_genome() method
+        REQ-1.7: mutate() method
+        REQ-1.8: crossover() static method
+        REQ-1.9: copy() method
+    """
     def __init__(self, layer_sizes: Tuple[int, ...] = (6, 8, 2)):
         """
         Initalize neural network with random weights.
@@ -20,6 +34,8 @@ class NeuralNetwork:
                 - 6 input neurons (e.g. sensor distances + goal angle)
                 - 8 hidden neurons
                 - 2 output neurons (turn angle, turn speed)
+
+        REQ-1.1, REQ-1.2
         """         
         
         self.layer_sizes = layer_sizes
@@ -44,6 +60,8 @@ class NeuralNetwork:
             inputs: Input array of shape (input_size,)
         Returns:
             Output array of shape (output_size,)
+
+        Implements: REQ-1.3, REQ-1.4
         """
         # force inputs are np array
         x = np.array(inputs, dtype=np.float32)
@@ -63,6 +81,8 @@ class NeuralNetwork:
 
         Returns:
             1d numpy array of all network params
+
+        Implements: REQ-1.5
         """
         genes = []
 
@@ -78,6 +98,8 @@ class NeuralNetwork:
         
         Aegs:
             genome: 1d array from get_genome() or GA operations
+        
+        Implements: REQ-1.6
         """
         idx = 0
 
@@ -96,7 +118,11 @@ class NeuralNetwork:
             idx += b_size
 
     def copy(self) -> 'NeuralNetwork':
-        """ Create a deep copy of this network"""
+        """ 
+        Create a deep copy of this network
+        
+        Implements: REQ-1.9
+        """
         new_nn = NeuralNetwork(self.layer_sizes)
         new_nn.set_genome(self.get_genome())
         return new_nn
@@ -127,6 +153,7 @@ class NeuralNetwork:
             parent2: second parent network
         Returns:
             child network with mixed genome
+        Implements: REQ-1.8
         """
         genome1 = parent1.get_genome()
         genome2 = parent2.get_genome()

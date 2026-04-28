@@ -14,6 +14,11 @@ import pygame
 
 class Agent:
     def __init__(self, x: float, y:float, direction: float, radius: float = 8.0):
+        """
+        Initialize agent with position, direction, and radius.
+        
+        Implements: REQ-2.1, REQ-2.8
+        """
         #position and orientation
         self.x = x
         self.y = y
@@ -53,7 +58,11 @@ class Agent:
         return (math.cos(self.direction), math.sin(self.direction))
     
     def reset(self):
-        """Reset agent to initial state."""
+        """
+        Reset agent to initial state.
+        
+        Implements: REQ-2.9
+        """
         self.x = self.start_x
         self.y = self.start_y
         self.direction = self.start_direction
@@ -78,6 +87,8 @@ class Agent:
 
         returns:
             (turn amount, speed mult) from neural net output
+        
+        Implements: REQ-2.2, REQ-2.6
         """
         if self.brain is None:
             return (0.0, 1.0)  # No brain, go straight at full speed
@@ -109,6 +120,8 @@ class Agent:
 
         returns:
             numpy array of normalized inputs
+
+        Implements: REQ-2.6
         """
         inputs = []
 
@@ -132,6 +145,8 @@ class Agent:
             angle in radians, range [-pi, pi]
             negative = target is to the right
             positive = target is to the left
+        
+        Implements: REQ-2.7
         """
         dx = target_x - self.x
         dy = target_y - self.y
@@ -153,6 +168,8 @@ class Agent:
         args:
             turn_amount: Amount to turn (radians)
             speed_multiplier: Multiplier for base speed (0 to 1)
+        
+        Implements: REQ-2.2, REQ-2.8
         """
         if not self.alive:
             return
@@ -176,6 +193,8 @@ class Agent:
             goal_x: X coord of goal
             goal_y: Y coord of goal
             sensor_range: Max sensor distance for raycasting
+        
+        Implements: REQ-2.3, REQ-2.4, REQ-2.5
         """
         if not self.alive or self.reached_goal:
             return
@@ -200,7 +219,11 @@ class Agent:
         return True
     
     def distance_to(self, x:float, y:float) -> float:
-        """Calculate distance from agent to a point."""
+        """
+        Calculate distance from agent to a point.
+        
+        Implements: REQ-2.10
+        """
         return math.sqrt((self.x - x) ** 2 + (self.y - y) ** 2)
     
     def copy(self) -> 'Agent':

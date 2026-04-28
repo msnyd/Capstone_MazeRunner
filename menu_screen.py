@@ -1,6 +1,14 @@
 import pygame
 from ui import Button
 
+"""
+Settings Screen module for MazeRunner.
+ 
+Implements:
+    REQ-9.5: Configurable params (population, steps, difficulty, etc.)
+    REQ-9.6: settings persist for session
+"""
+
 def run_menu(screen, config):
     screen_w, screen_h = config.screen_width, config.screen_height
     button_w, button_h = 240, 60
