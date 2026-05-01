@@ -52,12 +52,24 @@ This manual assumes that you have a basic understanding that MazeRunner is a sim
 
 ### Option 2: Installing the Executable Version
 
-1. Download the `MazeRunner.exe` file from the project repository  
+1. **Download the Executable:**
+   - Obtain the MazeRunner executable package from the project repository.
+2. **Extract the Files:**
+   - Right-click the downloaded `.zip` folder
+   - Select **"Extract All"**
+   - Choose a destination folder
+   - Ensure that all the files remain in the same folder as `MazeRunner.exe`
 
-2. Run the executable  
-   - Double-click the file to launch  
-   - No installation process is required  
-   - The executable contains all necessary components  
+3. **Run the Program**:
+   - Open the extracted folder
+   - Double-Click `MazeRunner.exe`
+
+---
+
+## GitHub Release (Version 1.0)
+Downloan the official release here:
+- **MazeRunner v1.0**
+  https://github.com/msnyd/Capstone_MazeRunner/releases/tag/v1.0
 
 ---
 
