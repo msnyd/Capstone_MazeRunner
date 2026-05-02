@@ -1,6 +1,6 @@
 """
 Quick test script for internal functions.
-Run from project root: python test_internals.py
+run from project root: python test_internals.py
 """
 
 import numpy as np

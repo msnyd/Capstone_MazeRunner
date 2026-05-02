@@ -6,6 +6,21 @@ Each agent has:
 - Direction (radians, 0 = facing right, increases counterclockwise)
 A neural net brain that controls movement
 sensors that detect maze walls via raycasting
+    
+Agent module for MazeRunner.
+
+Implements:
+    REQ-2.1: Agent position, direction, radius
+    REQ-2.2: Movement based on neural network output
+    REQ-2.3: Death on wall colision
+    REQ-2.4: Goal detection
+    REQ-2.5: Raycaster sensor integration
+    REQ-2.6: Normalized neural net inputs
+    REQ-2.7: Relative angle to goal calculation
+    REQ-2.8: steps counter
+    REQ-2.9: reset() method
+    REQ-2.10: distance_to() method
+
 """
 
 import math
@@ -13,6 +28,7 @@ import numpy as np
 import pygame
 
 class Agent:
+
     def __init__(self, x: float, y:float, direction: float, radius: float = 8.0):
         """
         Initialize agent with position, direction, and radius.
