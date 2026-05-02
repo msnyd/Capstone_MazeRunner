@@ -192,7 +192,8 @@ Choose from:
 ### Agents Don’t Move or Learn
 
 - Check that the simulation is not paused (`SPACE`)  
-- Reset the generation with `R`  
+- Reset the generation with `R`
+- If agents get stuck on a corner for too long, force evolving via `E` will force new paths  
 - Verify maze files exist and are valid JSON format  
 
 ---
