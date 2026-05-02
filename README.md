@@ -67,7 +67,7 @@ This manual assumes that you have a basic understanding that MazeRunner is a sim
 ---
 
 ## GitHub Release (Version 1.0)
-Downloan the official release here:
+Download the official release here:
 - **MazeRunner v1.0**
   https://github.com/msnyd/Capstone_MazeRunner/releases/tag/v1.0
 
