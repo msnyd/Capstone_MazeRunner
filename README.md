@@ -67,7 +67,7 @@ This manual assumes that you have a basic understanding that MazeRunner is a sim
 ---
 
 ## GitHub Release (Version 1.0)
-Downloan the official release here:
+Download the official release here:
 - **MazeRunner v1.0**
   https://github.com/msnyd/Capstone_MazeRunner/releases/tag/v1.0
 
@@ -192,7 +192,8 @@ Choose from:
 ### Agents Don’t Move or Learn
 
 - Check that the simulation is not paused (`SPACE`)  
-- Reset the generation with `R`  
+- Reset the generation with `R`
+- If agents get stuck on a corner for too long, force evolving via `E` will force new paths  
 - Verify maze files exist and are valid JSON format  
 
 ---
